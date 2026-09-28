@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Debit & Kapasitas IPAL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        pinky: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                            800: '#9f1239',
+                            900: '#881337',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #fff5f7 0%, #fedac5 100%);
+            min-height: 100vh;
+        }
+        .pink-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(253, 164, 175, 0.3);
+        }
+        .pink-gradient-btn {
+            background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+        }
+        .pink-gradient-btn:hover {
+            background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
+        }
+        /* Custom scrollbar for pink aesthetic */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #ffe4e6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #fda4af;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased pb-12">
+
+    <header class="w-full py-6 px-4 mb-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pinky-500 to-rose-400 flex items-center justify-center text-white shadow-lg shadow-pinky-200">
+                    <i class="fa-solid fa-droplet text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-pinky-900 tracking-tight">Kalkulator Debit IPAL</h1>
+                    <p class="text-xs md:text-sm text-pinky-600 font-medium">Analisis Aliran Pipa & Kapasitas Instalasi Pengolahan Air Limbah</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 bg-white/70 px-4 py-2 rounded-full border border-pinky-200 shadow-sm text-xs md:text-sm text-pinky-700">
+                <i class="fa-solid fa-wand-magic-sparkles text-pinky-500"></i>
+                <span>Estimasi Hidrolika Real-Time</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- LEFT COLUMN: INPUT CONTROLS -->
+        <section class="lg:col-span-5 flex flex-col gap-6">
+            
+            <!-- CARD 1: DIMENSI PIPA -->
+            <div class="pink-glass rounded-3xl p-6 shadow-xl shadow-pinky-100/50">
+                <div class="flex items-center justify-between mb-4 border-b border-pinky-100 pb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-nodes text-pinky-500 text-lg"></i>
+                        <h2 class="font-bold text-pinky-900 text-base md:text-lg">1. Parametrisasi Pipa Air Limbah</h2>
+                    </div>
+                    <span class="text-xs bg-pinky-100 text-pinky-700 px-2.5 py-1 rounded-full font-semibold">Pipa Saluran</span>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Preset Quick Selection -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Preset Diameter Pipa Standar</label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="setPipePreset(4)" class="py-1.5 text-xs font-medium rounded-xl border border-pinky-200 bg-white hover:bg-pinky-50 text-pinky-700 transition">4 Inch</button>
+                            <button onclick="setPipePreset(6)" class="py-1.5 text-xs font-medium rounded-xl border border-pinky-200 bg-white hover:bg-pinky-50 text-pinky-700 transition">6 Inch</button>
+                            <button onclick="setPipePreset(8)" class="py-1.5 text-xs font-medium rounded-xl border border-pinky-200 bg-white hover:bg-pinky-50 text-pinky-700 transition">8 Inch</button>
+                            <button onclick="setPipePreset(12)" class="py-1.5 text-xs font-medium rounded-xl border border-pinky-200 bg-white hover:bg-pinky-50 text-pinky-700 transition">12 Inch</button>
+                        </div>
+                    </div>
+
+                    <!-- Diameter Input -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="pipeDiameterInch" class="block text-xs font-semibold text-slate-600 mb-1">Diameter Pipa (Inch)</label>
+                            <div class="relative">
+                                <input type="number" id="pipeDiameterInch" value="6" step="0.5" min="0.5" class="w-full bg-white border border-pinky-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-pinky-400 font-semibold" oninput="syncPipeDiameter('inch')">
+                                <span class="absolute right-3 top-2.5 text-xs text-slate-400">in</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="pipeDiameterCm" class="block text-xs font-semibold text-slate-600 mb-1">Diameter (cm)</label>
+                            <div class="relative">
+                                <input type="number" id="pipeDiameterCm" value="15.24" step="0.1" min="1" class="w-full bg-white border border-pinky-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-pinky-400 font-semibold" oninput="syncPipeDiameter('cm')">
+                                <span class="absolute right-3 top-2.5 text-xs text-slate-400">cm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Water Level / Fill Height -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label for="pipeFillPercent" class="text-xs font-semibold text-slate-600">Ketinggian Aliran Air dalam Pipa</label>
+                            <span id="pipeFillLabel" class="text-xs font-bold text-pinky-600 bg-pinky-100 px-2 py-0.5 rounded-md">75% Terisi</span>
+                        </div>
+                        <input type="range" id="pipeFillPercent" min="5" max="100" value="75" step="1" class="w-full accent-pinky-500 cursor-pointer" oninput="calculateAll()">
+                        <div class="flex justify-between text-[10px] text-slate-400">
+                            <span>Minimum (5%)</span>
+                            <span>Separuh (50%)</span>
+                            <span>Penuh (100%)</span>
+                        </div>
+                    </div>
+
+                    <!-- Flow Velocity Mode Selection -->
+                    <div>
+                        <label for="calcMode" class="block text-xs font-semibold text-slate-600 mb-1">Metode Kecepatan Aliran Air</label>
+                        <select id="calcMode" onchange="toggleCalcMode()" class="w-full bg-white border border-pinky-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-pinky-400 font-medium">
+                            <option value="velocity">Input Kecepatan Langsung (m/detik)</option>
+                            <option value="manning">Formula Manning (Kemiringan / Slope)</option>
+                        </select>
+                    </div>
+
+                    <!-- Direct Velocity Input -->
+                    <div id="velocityInputContainer">
+                        <label for="flowVelocity" class="block text-xs font-semibold text-slate-600 mb-1">Kecepatan Aliran ($v$)</label>
+                        <div class="relative">
+                            <input type="number" id="flowVelocity" value="0.8" step="0.05" min="0.1" max="5" class="w-full bg-white border border-pinky-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-pinky-400 font-semibold" oninput="calculateAll()">
+                            <span class="absolute right-3 top-2.5 text-xs text-slate-400">m/s</span>
+                        </div>
+                        <p class="text-[11px] text-pinky-600 mt-1">💡 Kecepatan ideal gravitasi IPAL: 0.6 - 1.2 m/s (mencegah pengendapan).</p>
+                    </div>
+
+                    <!-- Manning Calculation Inputs (Hidden by default) -->
+                    <div id="manningInputContainer" class="hidden space-y-3 p-3 bg-pinky-50/60 rounded-2xl border border-pinky-200">
+                        <div>
+                            <label for="pipeSlope" class="block text-xs font-semibold text-slate-600 mb-1">Kemiringan Saluran / Slope (%)</label>
+                            <input type="number" id="pipeSlope" value="1.0" step="0.1" min="0.1" class="w-full bg-white border border-pinky-200 rounded-xl px-3 py-1.5 text-xs font-semibold" oninput="calculateAll()">
+                        </div>
+                        <div>
+                            <label for="manningN" class="block text-xs font-semibold text-slate-600 mb-1">Koefisien Kekasaran Manning ($n$)</label>
+                            <select id="manningN" onchange="calculateAll()" class="w-full bg-white border border-pinky-200 rounded-xl px-3 py-1.5 text-xs font-medium">
+                                <option value="0.010">0.010 - PVC / HDPE Halus</option>
+                                <option value="0.013" selected>0.013 - Pipa Beton Halus / VCT</option>
+                                <option value="0.015">0.015 - Saluran Pasangan Batu</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD 2: DIMENSI BAK IPAL -->
+            <div class="pink-glass rounded-3xl p-6 shadow-xl shadow-pinky-100/50">
+                <div class="flex items-center justify-between mb-4 border-b border-pinky-100 pb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-cubes-stacked text-pinky-500 text-lg"></i>
+                        <h2 class="font-bold text-pinky-900 text-base md:text-lg">2. Dimensi Bak IPAL / Kolam</h2>
+                    </div>
+                    <span class="text-xs bg-pinky-100 text-pinky-700 px-2.5 py-1 rounded-full font-semibold">Volume IPAL</span>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label for="ipalLength" class="block text-xs font-semibold text-slate-600 mb-1">Panjang ($L$)</label>
+                            <div class="relative">
+                                <input type="number" id="ipalLength" value="6" step="0.5" min="0.5" class="w-full bg-white border border-pinky-200 rounded-xl px-2.5 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-pinky-400 font-semibold" oninput="calculateAll()">
+                                <span class="absolute right-2 top-2.5 text-xs text-slate-400">m</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="ipalWidth" class="block text-xs font-semibold text-slate-600 mb-1">Lebar ($W$)</label>
+                            <div class="relative">
+                                <input type="number" id="ipalWidth" value="3" step="0.5" min="0.5" class="w-full bg-white border border-pinky-200 rounded-xl px-2.5 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-pinky-400 font-semibold" oninput="calculateAll()">
+                                <span class="absolute right-2 top-2.5 text-xs text-slate-400">m</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="ipalDepth" class="block text-xs font-semibold text-slate-600 mb-1">Kedalaman ($H$)</label>
+                            <div class="relative">
+                                <input type="number" id="ipalDepth" value="2.5" step="0.1" min="0.2" class="w-full bg-white border border-pinky-200 rounded-xl px-2.5 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-pinky-400 font-semibold" oninput="calculateAll()">
+                                <span class="absolute right-2 top-2.5 text-xs text-slate-400">m</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <label for="ipalType" class="block text-xs font-semibold text-slate-600 mb-1">Jenis Sistem IPAL (Untuk Evaluasi HRT)</label>
+                        <select id="ipalType" onchange="calculateAll()" class="w-full bg-white border border-pinky-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-pinky-400 font-medium">
+                            <option value="aerobic">Aerobik / Activated Sludge (Standard HRT: 6 - 12 Jam)</option>
+                            <option value="anaerobic">Anaerobik / Septic Tank / ABR (Standard HRT: 12 - 24 Jam)</option>
+                            <option value="sedimentation">Bak Pengendapan / Sedimentasi (Standard HRT: 1.5 - 4 Jam)</option>
+                            <option value="facultative">Kolam Fakulatif / Aerasi (Standard HRT: 2 - 10 Hari)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT COLUMN: VISUALIZATIONS & KPI DASHBOARD -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+            
+            <!-- VISUAL GRAPHICS (PIPE & TANK VISUALIZER) -->
+            <div class="pink-glass rounded-3xl p-6 shadow-xl shadow-pinky-100/50">
+                <h3 class="font-bold text-pinky-900 text-base mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-eye text-pinky-500"></i> Simulasi Visual Penampang & IPAL
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    
+                    <!-- SVG Visual Pipa -->
+                    <div class="flex flex-col items-center bg-white/60 p-4 rounded-2xl border border-pinky-100">
+                        <span class="text-xs font-bold text-slate-600 mb-2">Penampang Pipa Air</span>
+                        <div class="relative w-40 h-40 flex items-center justify-center">
+                            <svg id="pipeSvg" viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                                <!-- Pipa Outer -->
+                                <circle cx="50" cy="50" r="45" fill="#f1f5f9" stroke="#fda4af" stroke-width="4" />
+                                <!-- Clip Path for Partial Water Fill -->
+                                <clipPath id="pipeWaterClip">
+                                    <rect id="waterRect" x="0" y="50" width="100" height="50" />
+                                </clipPath>
+                                <!-- Water Fill -->
+                                <circle cx="50" cy="50" r="43" fill="url(#pinkWaterGrad)" clip-path="url(#pipeWaterClip)" />
+                                <!-- Water Surface Line -->
+                                <line id="waterLine" x1="5" y1="50" x2="95" y2="50" stroke="#f43f5e" stroke-width="1.5" stroke-dasharray="2,2"/>
+                                <!-- Inner Grid Lines -->
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="#e11d48" stroke-width="1" opacity="0.3" />
+                                <!-- Gradient definition -->
+                                <defs>
+                                    <linearGradient id="pinkWaterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stop-color="#fda4af" stop-opacity="0.8" />
+                                        <stop offset="100%" stop-color="#e11d48" stop-opacity="0.95" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <span id="vizPipeAreaText" class="text-xs font-semibold text-pinky-800">Luas Basah: 0.00 m²</span>
+                        </div>
+                    </div>
+
+                    <!-- SVG Visual IPAL Tank -->
+                    <div class="flex flex-col items-center bg-white/60 p-4 rounded-2xl border border-pinky-100">
+                        <span class="text-xs font-bold text-slate-600 mb-2">Simulasi Bak IPAL</span>
+                        <div class="relative w-48 h-40 flex items-center justify-center">
+                            <svg viewBox="0 0 120 90" class="w-full h-full drop-shadow-md">
+                                <!-- Tank Outer Structure -->
+                                <rect x="10" y="15" width="100" height="65" rx="4" fill="#f8fafc" stroke="#fb7185" stroke-width="3" />
+                                <!-- Water inside Tank -->
+                                <rect id="tankWater" x="13" y="25" width="94" height="52" fill="url(#pinkWaterGrad)" opacity="0.85" />
+                                <!-- Inflow Pipe Icon visual -->
+                                <rect x="0" y="20" width="12" height="6" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1"/>
+                                <!-- Outflow Pipe Icon visual -->
+                                <rect x="108" y="60" width="12" height="6" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1"/>
+                                <!-- Wave animated line -->
+                                <path id="tankWave" d="M 13 25 Q 35 22, 60 25 T 107 25" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.8"/>
+                            </svg>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <span id="vizTankVolText" class="text-xs font-semibold text-pinky-800">Volume Efektif: 0.00 m³</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- KPI CARDS SUMMARY -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <!-- Debit m3/jam -->
+                <div class="bg-white/90 p-4 rounded-2xl border border-pinky-200 shadow-sm flex flex-col">
+                    <span class="text-[11px] font-semibold text-slate-500 uppercase">Debit Air (Q)</span>
+                    <span id="kpiDebitM3Jam" class="text-xl font-extrabold text-pinky-700 my-1">0.00</span>
+                    <span class="text-[10px] text-pinky-500 font-medium">m³/jam</span>
+                </div>
+
+                <!-- Debit L/detik -->
+                <div class="bg-white/90 p-4 rounded-2xl border border-pinky-200 shadow-sm flex flex-col">
+                    <span class="text-[11px] font-semibold text-slate-500 uppercase">Debit Air (Q)</span>
+                    <span id="kpiDebitLps" class="text-xl font-extrabold text-pinky-700 my-1">0.00</span>
+                    <span class="text-[10px] text-pinky-500 font-medium">Liter / detik</span>
+                </div>
+
+                <!-- HRT / Waktu Tinggal -->
+                <div class="bg-white/90 p-4 rounded-2xl border border-pinky-200 shadow-sm flex flex-col">
+                    <span class="text-[11px] font-semibold text-slate-500 uppercase">Waktu Tinggal (HRT)</span>
+                    <span id="kpiHrt" class="text-xl font-extrabold text-pinky-700 my-1">0.00</span>
+                    <span id="kpiHrtUnit" class="text-[10px] text-pinky-500 font-medium">Jam</span>
+                </div>
+
+                <!-- HLR / Beban Hidrolik -->
+                <div class="bg-white/90 p-4 rounded-2xl border border-pinky-200 shadow-sm flex flex-col">
+                    <span class="text-[11px] font-semibold text-slate-500 uppercase">Beban Surface (HLR)</span>
+                    <span id="kpiHlr" class="text-xl font-extrabold text-pinky-700 my-1">0.00</span>
+                    <span class="text-[10px] text-pinky-500 font-medium">m³ / m² · hari</span>
+                </div>
+            </div>
+
+            <!-- DETAILED EVALUATION & SUMMARY CARD -->
+            <div class="pink-glass rounded-3xl p-6 shadow-xl shadow-pinky-100/50 flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-pinky-900 text-base flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-pinky-500"></i> Hasil Evaluasi Hidrolika IPAL
+                        </h3>
+                        <span id="statusBadge" class="px-3 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-700">
+                            Status Optimal
+                        </span>
+                    </div>
+
+                    <!-- Recommendation Message Box -->
+                    <div id="statusMessageBox" class="p-4 rounded-2xl bg-white/80 border border-pinky-200 mb-4 text-xs leading-relaxed text-slate-700">
+                        <!-- Dynamic Text loaded via JS -->
+                    </div>
+
+                    <!-- Breakdown Table -->
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between py-1.5 border-b border-pinky-100">
+                            <span class="text-slate-500">Debit Harian ($Q_{harian}$):</span>
+                            <span id="resDebitHarian" class="font-bold text-slate-800">0.00 m³/hari</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-pinky-100">
+                            <span class="text-slate-500">Luas Permukaan IPAL ($A_{surface}$):</span>
+                            <span id="resLuasIpal" class="font-bold text-slate-800">0.00 m²</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-pinky-100">
+                            <span class="text-slate-500">Volume Total Bak IPAL ($V_{bak}$):</span>
+                            <span id="resVolIpal" class="font-bold text-slate-800">0.00 m³</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-pinky-100">
+                            <span class="text-slate-500">Kecepatan Aliran Pipa Actual ($v$):</span>
+                            <span id="resVelActual" class="font-bold text-slate-800">0.00 m/s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                    <button onclick="copySummaryReport()" class="pink-gradient-btn text-white text-xs font-bold py-3 px-5 rounded-2xl shadow-lg shadow-pinky-200 flex items-center justify-center gap-2 flex-1 transition active:scale-95">
+                        <i class="fa-regular fa-copy"></i> Salin Ringkasan Laporan
+                    </button>
+                    <button onclick="window.print()" class="bg-white hover:bg-pinky-50 text-pinky-700 text-xs font-bold py-3 px-5 rounded-2xl border border-pinky-200 shadow-sm flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-print"></i> Cetak Halaman
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        // Synchronize pipe diameter input between Inch and Centimeter
+        function syncPipeDiameter(source) {
+            const inchInput = document.getElementById('pipeDiameterInch');
+            const cmInput = document.getElementById('pipeDiameterCm');
+
+            if (source === 'inch') {
+                const val = parseFloat(inchInput.value) || 0;
+                cmInput.value = (val * 2.54).toFixed(2);
+            } else {
+                const val = parseFloat(cmInput.value) || 0;
+                inchInput.value = (val / 2.54).toFixed(2);
+            }
+            calculateAll();
+        }
+
+        // Quick set pipe diameter preset
+        function setPipePreset(inchVal) {
+            document.getElementById('pipeDiameterInch').value = inchVal;
+            syncPipeDiameter('inch');
+        }
+
+        // Toggle direct velocity vs Manning calculation
+        function toggleCalcMode() {
+            const mode = document.getElementById('calcMode').value;
+            const velContainer = document.getElementById('velocityInputContainer');
+            const manningContainer = document.getElementById('manningInputContainer');
+
+            if (mode === 'manning') {
+                velContainer.classList.add('hidden');
+                manningContainer.classList.remove('hidden');
+            } else {
+                velContainer.classList.remove('hidden');
+                manningContainer.classList.add('hidden');
+            }
+            calculateAll();
+        }
+
+        // Main Calculation Engine
+        function calculateAll() {
+            // 1. Read Inputs
+            const pipeDiameterInch = parseFloat(document.getElementById('pipeDiameterInch').value) || 0;
+            const pipeDiameterMeters = (pipeDiameterInch * 0.0254); // convert to meters
+            const fillPercent = Math.min(Math.max(parseFloat(document.getElementById('pipeDiameterInch') ? document.getElementById('pipeFillPercent').value : 75), 1), 100);
+            
+            document.getElementById('pipeFillLabel').innerText = `${fillPercent}% Terisi`;
+
+            const mode = document.getElementById('calcMode').value;
+            let velocity = 0; // m/s
+
+            // Calculate Hydraulic Radius & Flow Area for partial circular pipe
+            // h = depth of flow
+            const D = pipeDiameterMeters;
+            const r = D / 2;
+            const h = (fillPercent / 100) * D; // flow height in meters
+
+            let areaWet = 0; // m²
+            let hydraulicRadius = 0; // m
+
+            if (fillPercent >= 100) {
+                areaWet = Math.PI * Math.pow(r, 2);
+                const wettedPerimeter = Math.PI * D;
+                hydraulicRadius = areaWet / wettedPerimeter;
+            } else {
+                // Central angle theta in radians: cos(theta/2) = (r - h) / r
+                let cosVal = (r - h) / r;
+                // clamp for floating point errors
+                cosVal = Math.max(-1, Math.min(1, cosVal));
+                const theta = 2 * Math.acos(cosVal); // radians
+
+                // Area of circular segment
+                areaWet = (Math.pow(r, 2) / 2) * (theta - Math.sin(theta));
+                
+                // Wetted perimeter
+                const wettedPerimeter = r * theta;
+                hydraulicRadius = wettedPerimeter > 0 ? (areaWet / wettedPerimeter) : 0;
+            }
+
+            // Determine Velocity
+            if (mode === 'velocity') {
+                velocity = parseFloat(document.getElementById('flowVelocity').value) || 0;
+            } else {
+                // Manning Equation: v = (1/n) * (R_h)^(2/3) * (S)^(1/2)
+                const slopePct = parseFloat(document.getElementById('pipeSlope').value) || 0;
+                const slope = slopePct / 100; // convert % to decimal
+                const n = parseFloat(document.getElementById('manningN').value) || 0.013;
+
+                if (hydraulicRadius > 0 && slope > 0) {
+                    velocity = (1 / n) * Math.pow(hydraulicRadius, 2/3) * Math.pow(slope, 0.5);
+                } else {
+                    velocity = 0;
+                }
+            }
+
+            // 2. Flow Rate Calculations
+            const flowRateM3s = areaWet * velocity; // m³/s
+            const flowRateM3h = flowRateM3s * 3600; // m³/jam
+            const flowRateLps = flowRateM3s * 1000;  // Liter/detik
+            const flowRateM3Day = flowRateM3h * 24;  // m³/hari
+
+            // 3. IPAL Tank Calculations
+            const length = parseFloat(document.getElementById('ipalLength').value) || 0;
+            const width = parseFloat(document.getElementById('ipalWidth').value) || 0;
+            const depth = parseFloat(document.getElementById('ipalDepth').value) || 0;
+
+            const areaSurfaceIpal = length * width; // m²
+            const volumeIpal = areaSurfaceIpal * depth; // m³
+
+            // HRT (Hydraulic Retention Time in Hours)
+            const hrtHours = flowRateM3h > 0 ? (volumeIpal / flowRateM3h) : 0;
+
+            // HLR (Hydraulic Loading Rate in m³/m²·day)
+            const hlr = areaSurfaceIpal > 0 ? (flowRateM3Day / areaSurfaceIpal) : 0;
+
+            // 4. Update UI Outputs
+            document.getElementById('kpiDebitM3Jam').innerText = flowRateM3h.toFixed(2);
+            document.getElementById('kpiDebitLps').innerText = flowRateLps.toFixed(2);
+            
+            // Format HRT cleanly
+            if (hrtHours >= 48) {
+                document.getElementById('kpiHrt').innerText = (hrtHours / 24).toFixed(1);
+                document.getElementById('kpiHrtUnit').innerText = 'Hari';
+            } else {
+                document.getElementById('kpiHrt').innerText = hrtHours.toFixed(1);
+                document.getElementById('kpiHrtUnit').innerText = 'Jam';
+            }
+
+            document.getElementById('kpiHlr').innerText = hlr.toFixed(2);
+
+            // Table Breakdown Update
+            document.getElementById('resDebitHarian').innerText = `${flowRateM3Day.toFixed(1)} m³/hari`;
+            document.getElementById('resLuasIpal').innerText = `${areaSurfaceIpal.toFixed(1)} m²`;
+            document.getElementById('resVolIpal').innerText = `${volumeIpal.toFixed(1)} m³`;
+            document.getElementById('resVelActual').innerText = `${velocity.toFixed(2)} m/s`;
+
+            // 5. Update SVG Visualizations
+            updateSvgVisuals(fillPercent, areaWet, volumeIpal);
+
+            // 6. Evaluate System Status
+            evaluateIpalStatus(hrtHours, velocity, fillPercent);
+        }
+
+        // Update Dynamic SVG graphics
+        function updateSvgVisuals(fillPercent, areaWet, volumeIpal) {
+            // Update Pipe Water Rect Clip
+            // In SVG viewBox 0 0 100 100, y=5 is top, y=95 is bottom
+            // Height range is 90
+            const fillHeightY = 95 - (fillPercent / 100) * 90;
+            const rectHeight = (fillPercent / 100) * 90;
+
+            const waterRect = document.getElementById('waterRect');
+            const waterLine = document.getElementById('waterLine');
+
+            if (waterRect) {
+                waterRect.setAttribute('y', fillHeightY);
+                waterRect.setAttribute('height', rectHeight);
+            }
+            if (waterLine) {
+                waterLine.setAttribute('y1', fillHeightY);
+                waterLine.setAttribute('y2', fillHeightY);
+            }
+
+            document.getElementById('vizPipeAreaText').innerText = `Luas Basah: ${(areaWet * 10000).toFixed(1)} cm² (${areaWet.toFixed(4)} m²)`;
+            document.getElementById('vizTankVolText').innerText = `Volume Efektif: ${volumeIpal.toFixed(2)} m³`;
+        }
+
+        // System Health / HRT Evaluation
+        function evaluateIpalStatus(hrtHours, velocity, fillPercent) {
+            const systemType = document.getElementById('ipalType').value;
+            const badge = document.getElementById('statusBadge');
+            const msgBox = document.getElementById('statusMessageBox');
+
+            let isOptimal = true;
+            let message = "";
+            let badgeText = "Optimal";
+            let badgeColorClass = "bg-emerald-100 text-emerald-700 border-emerald-200";
+
+            // Velocity Check
+            let velWarning = "";
+            if (velocity < 0.6) {
+                velWarning = "⚠️ Kecepatan aliran pipa terlalu lambat (< 0.6 m/s), berisiko terjadi pengendapan lumpur/padatan di dalam saluran. ";
+            } else if (velocity > 2.5) {
+                velWarning = "⚠️ Kecepatan aliran pipa sangat tinggi (> 2.5 m/s), berpotensi menggerus permukaan pipa (pengikisan). ";
+            }
+
+            // System HRT Criteria
+            if (systemType === 'aerobic') {
+                // Ideal: 6 - 12 Hours
+                if (hrtHours < 6) {
+                    isOptimal = false;
+                    message = `<b>Waktu tinggal (HRT ${hrtHours.toFixed(1)} jam) terlalu singkat!</b> Bak aerobik membutuhkan waktu tinggal minimal 6-12 jam agar mikroorganisme dapat menguraikan beban organik (BOD/COD) dengan sempurna. Perlu memperbesar volume bak atau mengurangi debit masuk.`;
+                } else if (hrtHours > 24) {
+                    message = `<b>Waktu tinggal (HRT ${hrtHours.toFixed(1)} jam) sangat panjang.</b> Pengolahan sangat efektif, namun pastikan kecukupan suplai oksigen (aerasi) berjalan terus-menerus agar tidak anaerobik.`;
+                } else {
+                    message = `<b>Kapasitas IPAL Sangat Ideal.</b> HRT (${hrtHours.toFixed(1)} jam) berada dalam rentang standar sistem aerobik (6-12 jam). Mikroba aerob dapat mendegradasi polutan dengan optimal.`;
+                }
+            } else if (systemType === 'anaerobic') {
+                // Ideal: 12 - 24 Hours
+                if (hrtHours < 12) {
+                    isOptimal = false;
+                    message = `<b>Waktu tinggal (HRT ${hrtHours.toFixed(1)} jam) kurang memadai untuk sistem anaerobik.</b> Proses anaerobik membutuhkan minimal 12-24 jam untuk dekomposisi metanogenik yang stabil.`;
+                } else {
+                    message = `<b>Desain Cukup Baik.</b> HRT (${hrtHours.toFixed(1)} jam) memenuhi syarat pengolahan anaerobik. Bak memiliki waktu yang cukup untuk proses fermentasi dan pengendapan lumpur.`;
+                }
+            } else if (systemType === 'sedimentation') {
+                // Ideal: 1.5 - 4 Hours
+                if (hrtHours < 1.5) {
+                    isOptimal = false;
+                    message = `<b>HRT (${hrtHours.toFixed(1)} jam) terlalu cepat untuk bak sedimentasi!</b> Flok/partikel tersuspensi (TSS) tidak sempat mengendap dan akan terbawa keluar (carry-over).`;
+                } else {
+                    message = `<b>Efektif.</b> HRT (${hrtHours.toFixed(1)} jam) ideal untuk pemisahan padatan secara gravitasi tanpa timbul flok mengapung akibat pembusukan.`;
+                }
+            } else {
+                // Facultative
+                if (hrtHours < 48) {
+                    isOptimal = false;
+                    message = `<b>Volume Kolam Terlalu Kecil.</b> Kolam fakultatif/aerasi alami umumnya membutuhkan retensi beberapa hari (2-10 hari).`;
+                } else {
+                    message = `<b>Sesuai Kriteria Kolam Fakulatif.</b> Retensi air mencukupi untuk proses pembersihan alami (self-purification).`;
+                }
+            }
+
+            if (!isOptimal) {
+                badgeText = "Perlu Penyesuaian";
+                badgeColorClass = "bg-rose-100 text-rose-700 border-rose-200";
+            }
+
+            badge.className = `px-3 py-1 text-xs font-bold rounded-full border ${badgeColorClass}`;
+            badge.innerText = badgeText;
+            msgBox.innerHTML = `${velWarning}${message}`;
+        }
+
+        // Copy Text Summary to Clipboard
+        function copySummaryReport() {
+            const pipeDia = document.getElementById('pipeDiameterInch').value;
+            const fill = document.getElementById('pipeFillPercent').value;
+            const qM3h = document.getElementById('kpiDebitM3Jam').innerText;
+            const qLps = document.getElementById('kpiDebitLps').innerText;
+            const hrt = document.getElementById('kpiHrt').innerText;
+            const hrtUnit = document.getElementById('kpiHrtUnit').innerText;
+            const hlr = document.getElementById('kpiHlr').innerText;
+            const status = document.getElementById('statusBadge').innerText;
+
+            const textToCopy = `=== LAPORAN RINGKASAN HIDROLIKA IPAL ===
+• Ukuran Pipa: ${pipeDia} Inch (${fill}% Terisi)
+• Debit Air (Q): ${qM3h} m³/jam (${qLps} L/detik)
+• Volume IPAL: ${document.getElementById('resVolIpal').innerText}
+• Waktu Tinggal (HRT): ${hrt} ${hrtUnit}
+• Beban Surface (HLR): ${hlr} m³/m²·hari
+• Evaluasi Status: ${status}
+=======================================`;
+
+            // Clipboard copy fallbacks
+            const tempInput = document.createElement('textarea');
+            tempInput.value = textToCopy;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            alert("✅ Ringkasan laporan berhasil disalin ke clipboard!");
+        }
+
+        // Initial trigger on load
+        window.onload = function() {
+            calculateAll();
+        };
+    </script>
+</body>
+</html>
